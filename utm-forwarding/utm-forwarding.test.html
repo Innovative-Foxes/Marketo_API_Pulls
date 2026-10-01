@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UTM Forwarding — local test harness</title>
+  <!--
+    Load the script as high as possible, before anything that reads the URL
+    (in production: before Munchkin / forms2.min.js / loadForm). It auto-runs
+    on load: stores tracking params if present, else restores them.
+  -->
+  <script>window.utmForwardingOptions = { expireDays: 30 };</script>
+  <script src="utm-forwarding.js"></script>
+  <style>
+    body { font: 15px/1.5 -apple-system, Segoe UI, Roboto, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 20px; color: #1a1a1a; }
+    h1 { font-size: 20px; } h2 { font-size: 15px; margin-top: 28px; }
+    code, pre { background: #f4f4f5; border-radius: 4px; padding: 2px 6px; font-size: 13px; }
+    pre { padding: 12px; overflow-x: auto; white-space: pre-wrap; word-break: break-all; }
+    .row { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0; }
+    a.btn, button { display: inline-block; background: #4f46e5; color: #fff; text-decoration: none; padding: 9px 14px; border-radius: 6px; border: 0; font-size: 14px; cursor: pointer; }
+    button.ghost { background: #e4e4e7; color: #1a1a1a; }
+    .k { color: #6b7280; } .ok { color: #059669; font-weight: 600; } .no { color: #9ca3af; }
+    table { border-collapse: collapse; width: 100%; font-size: 13px; }
+    td, th { border-bottom: 1px solid #eee; text-align: left; padding: 6px 8px; }
+  </style>
+</head>
+<body>
+  <h1>UTM Forwarding — local test harness</h1>
+  <p>The script above already ran. This page just reports what it did.</p>
+
+  <h2>1. Current URL (after the script ran)</h2>
+  <pre id="href"></pre>
+  <p class="k">Raw query string: <code id="search"></code></p>
+
+  <h2>2. Tracking params visible on this URL now</h2>
+  <table id="params"><tbody></tbody></table>
+
+  <h2>3. What's persisted in <code>localStorage['last_utm_query']</code></h2>
+  <pre id="store"></pre>
+
+  <h2>Try it</h2>
+  <div class="row">
+    <a class="btn" href="?utm_source=google&amp;utm_medium=cpc&amp;utm_campaign=spring_sale&amp;foo=bar&amp;gclid=xyz123">
+      ① Arrive WITH UTMs (+ noise)
+    </a>
+    <a class="btn" href="utm-forwarding.test.html">
+      ② Land on a CLEAN page (no params)
+    </a>
+    <button class="ghost" onclick="localStorage.removeItem('last_utm_query'); location.href='utm-forwarding.test.html';">
+      Reset storage
+    </button>
+  </div>
+  <p class="k">Test flow: click ① (script stores the UTMs, drops <code>foo</code>), then click ②
+  (script replays the stored UTMs back onto the clean URL via <code>history.replaceState</code>).</p>
+
+  <script>
+    var TRACK = ['utm_source','utm_medium','utm_campaign','utm_term','utm_content','utm_id','gclid','gbraid','wbraid','fbclid','msclkid','mkt_tok','utm_restored'];
+    function render() {
+      document.getElementById('href').textContent = location.href;
+      document.getElementById('search').textContent = location.search || '(none)';
+
+      var params = new URLSearchParams(location.search);
+      var rows = '';
+      TRACK.forEach(function (p) {
+        if (params.has(p)) rows += '<tr><td><code>' + p + '</code></td><td class="ok">' + params.get(p) + '</td></tr>';
+      });
+      var other = [];
+      params.forEach(function (v, k) { if (TRACK.indexOf(k) === -1) other.push(k); });
+      if (other.length) rows += '<tr><td class="no">' + other.join(', ') + '</td><td class="no">(ignored — not forwarded)</td></tr>';
+      document.getElementById('params').querySelector('tbody').innerHTML =
+        rows || '<tr><td class="no" colspan="2">none on this URL</td></tr>';
+
+      var raw = localStorage.getItem('last_utm_query');
+      document.getElementById('store').textContent = raw
+        ? JSON.stringify(JSON.parse(raw), null, 2)
+        : '(empty)';
+    }
+    render();
+  </script>
+</body>
+</html>

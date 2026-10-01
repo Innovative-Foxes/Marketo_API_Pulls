@@ -1,0 +1,16 @@
+{
+  "name": "folder-programs-export",
+  "version": "1.0.0",
+  "description": "Export every Marketo program under a named folder tree to JSON, CSV, text and an Excel workbook.",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "dotenv": "^16.4.5",
+    "exceljs": "^4.4.0"
+  },
+  "license": "MIT"
+}

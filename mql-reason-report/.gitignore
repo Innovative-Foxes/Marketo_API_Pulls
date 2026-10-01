@@ -1,0 +1,10 @@
+# Secrets and generated data never get committed.
+.env
+output/
+raw/
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store

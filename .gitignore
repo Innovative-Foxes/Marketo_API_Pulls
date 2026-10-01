@@ -1,0 +1,11 @@
+# Secrets, generated data and local environments are never committed.
+# Each pull keeps its credentials in its own `.env`; commit only `.env.example`.
+.env
+output/
+raw/
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store

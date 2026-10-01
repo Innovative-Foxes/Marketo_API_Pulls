@@ -1,0 +1,16 @@
+# Secrets and generated data never get committed.
+.env
+output/
+raw/
+.venv/
+venv/
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+
+# FlowBoost private key lives here
+lab/.env
+verify/.env
+# Generated test-lead files contain email addresses
+test-kit/*.csv
